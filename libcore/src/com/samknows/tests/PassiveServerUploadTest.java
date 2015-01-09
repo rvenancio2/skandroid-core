@@ -82,4 +82,9 @@ public class PassiveServerUploadTest extends UploadTest {
 		boolean isWarmup = false;
 		return transmit(socket, threadIndex, isWarmup);
 	}
+	
+	@Override
+	public ETestType getType() {
+		return ETestType.C_UPLOAD;
+	}
 }

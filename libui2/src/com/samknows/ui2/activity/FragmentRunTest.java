@@ -1,11 +1,14 @@
 package com.samknows.ui2.activity;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -28,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
@@ -64,6 +68,8 @@ import com.samknows.measurement.activity.components.FontFitTextView;
 import com.samknows.measurement.schedule.ScheduleConfig;
 import com.samknows.measurement.storage.DBHelper;
 import com.samknows.measurement.storage.StorageTestResult;
+import com.samknows.tests.EDimension;
+import com.samknows.tests.ITest;
 
 /**
  * This fragment is responsible for running the tests and managing the home screen.
@@ -73,7 +79,7 @@ import com.samknows.measurement.storage.StorageTestResult;
  */
 
 
-public class FragmentRunTest extends Fragment
+public class FragmentRunTest extends Fragment implements Observer
 {
 	// *** CONSTANTS *** //
 	private final static String C_TAG_FRAGMENT_SPEED_TEST = "Fragment SpeedTest";	// Tag for this fragment
@@ -148,11 +154,12 @@ public class FragmentRunTest extends Fragment
     private Thread threadRunningTests;				// Thread that run the tests
     private ManualTest manualTest;					// Object containing the ManualTest class object
     public Handler testResultsHandler;				// Handler that listen for the test results
+    public Handler testResultsHandler_Pablo;		// Handler that listen for the test results
     private ScheduleConfig config;
 
 	private	TextView publicIp;
 	private	TextView submissionId;
-
+	
     // *** FRAGMENT LIFECYCLE METHODS *** //
     // Called to have the fragment instantiate its user interface view.
 	@Override
@@ -196,7 +203,8 @@ public class FragmentRunTest extends Fragment
         LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiverCurrentLatency, new IntentFilter("currentLatencyIntent"));			// Current latency value
         
 		// Start the periodic timer!
-		startTimer();
+        //startTimer();
+        SKApplication.getAppInstance().addObserver(this);
 
         // Add the listener to the telephonyManager to listen for changes in the data connectivity
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
@@ -219,7 +227,8 @@ public class FragmentRunTest extends Fragment
         LocalBroadcastManager.getInstance(context).unregisterReceiver(messageReceiverCurrentLatency);
 
 		// Stop the periodic timer!
-		stopTimer();
+		//stopTimer();
+        SKApplication.getAppInstance().deleteObserver(this);
 
         //Remove the telephonyManager listener
         telephonyManager.listen(null, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
@@ -284,47 +293,66 @@ public class FragmentRunTest extends Fragment
 
     };
     	
-    Handler mHandler = new Handler();
-    Timer myTimer = null;
+//    Handler mHandler = new Handler();
+//    Timer myTimer = null;
    
-    private void stopTimer() {
-    	if (myTimer != null) {
-    		myTimer.cancel();
-    		myTimer = null;
-    	}
-    }
+//    private void stopTimer() {
+//    	if (myTimer != null) {
+//    		myTimer.cancel();
+//    		myTimer = null;
+//    	}
+//    }
    
     static double lastPolledSpeedValueMbps = 0;
+       
+    @Override
+	public void update(Observable observable, Object data) {
+		if (data instanceof ITest){
+			ITest currentTest = (ITest) data;
+			double value = currentTest.getValue();
+			EDimension dimension = currentTest.getDimension();
+			
+			if (value != lastPolledSpeedValueMbps) {
+				SKLogger.e(this.toString(), "Value updated:at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + value);//haha
+				lastPolledSpeedValueMbps = value;
+				//String message = String.valueOf(value);
+				updateCurrentTestValue(value, dimension);								// Update the current result meter for download/upload
+				gaugeView.setAngleByValue(value);										// Update the gauge colour indicator (in Megabytes)
+				lastTimeMillisCurrentSpeed = System.currentTimeMillis();				// Register the time of the last UI update
+			}
+		}
+	}
     
-    private void startTimer() {
-    	
-       Timer myTimer = new Timer();
-        myTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-            	// For each timer "tick", *IF* the tests are running, we must see if the
-            	// measured speed has changed since last time... and if so, update the UI.
-            	// Otherwise, do nothing!
-            	if (testsRunning) {
-            		mHandler.post(new Runnable() {
-
-            			@Override
-            			public void run() {
-            				Pair<Double,String> value = com.samknows.tests.HttpTest.sGetLatestSpeedForExternalMonitorAsMbps();
-//Log.d("MPCMPCMPC", "gotResult for timer, =" + value.first + " Mbps (" + value.second + ")");
-            				if (value.first.doubleValue() != lastPolledSpeedValueMbps) {
-            					lastPolledSpeedValueMbps = value.first.doubleValue();
-            					String message = String.valueOf(value);
-            					updateCurrentTestSpeedMbps(value.first.doubleValue());										// Update the current result meter for download/upload
-            					gaugeView.setAngleByValue(value.first.doubleValue());					// Update the gauge colour indicator (in Megabytes)
-            					lastTimeMillisCurrentSpeed = System.currentTimeMillis();				// Register the time of the last UI update
-            				}
-            			}});
-            	}
-            }
-
-        }, 0, C_UPDATE_INTERVAL_IN_MS);
-    }
+//    private void startTimer() {
+//    	
+//       Timer myTimer = new Timer();
+//        myTimer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//            	// For each timer "tick", *IF* the tests are running, we must see if the
+//            	// measured speed has changed since last time... and if so, update the UI.
+//            	// Otherwise, do nothing!
+//            	if (testsRunning) {
+//            		mHandler.post(new Runnable() {
+//
+//            			@Override
+//            			public void run() {
+//            				Pair<Double,String> value = com.samknows.tests.HttpTest.sGetLatestSpeedForExternalMonitorAsMbps();
+//            				//Log.d("MPCMPCMPC", "gotResult for timer, =" + value.first + " Mbps (" + value.second + ")");
+//            				if (value.first.doubleValue() != lastPolledSpeedValueMbps) {
+//            					lastPolledSpeedValueMbps = value.first.doubleValue();
+//            					String message = String.valueOf(value);
+//            					updateCurrentTestSpeedMbps(value.first.doubleValue());										// Update the current result meter for download/upload
+//            					gaugeView.setAngleByValue(value.first.doubleValue());					// Update the gauge colour indicator (in Megabytes)
+//            					lastTimeMillisCurrentSpeed = System.currentTimeMillis();				// Register the time of the last UI update
+//            				}
+//            			}
+//            		});
+//            	}
+//            }
+//
+//        }, 0, C_UPDATE_INTERVAL_IN_MS);
+//    }
     
 
     
@@ -761,8 +789,51 @@ public class FragmentRunTest extends Fragment
 
 		});
 
+		
+		
+/*Here we are at the moemtn
+ * 
+ * 
+ * 
+ * */			
+		
+		
+		
+	class HandlerExtension extends Handler{
+		private final WeakReference<FragmentActivity> currentActivity;
+		
+		public HandlerExtension(FragmentActivity activity){
+			currentActivity = new WeakReference<FragmentActivity>(activity);
+		}
+		
+		@Override
+		public void handleMessage(Message message){
+			FragmentActivity activity = currentActivity.get();
+			
+			if (isAdded() == false) {
+    			// This fragment is NOT attached to the activity.
+    			// Don't do anything with the message, or we're likely to crash!
+    			SKLogger.sAssert(getClass(), false);
+    			return;
+    		}
+    	
+    		
+    		
+    		
+    		SKLogger.e(this.toString(), "Here should be received message... ");
+    		if(true)
+    			return;
+			
+			
+		}
+		
+	}
+		
+		testResultsHandler = new HandlerExtension( this.getActivity() );
+		
+		
 		// Handler that is listening for test results and updates the UI
-	    testResultsHandler = new Handler()
+	    testResultsHandler_Pablo = new Handler()
 	    {
 	    	// Subclasses must implement this to receive messages
 	    	@Override
@@ -774,12 +845,25 @@ public class FragmentRunTest extends Fragment
 	    			SKLogger.sAssert(getClass(), false);
 	    			return;
 	    		}
+	    	
+	    		
+    		
+	    		
+	    		
+	    		
+	    		SKLogger.e(this.toString(), "Here should be received message... ");
+	    		if(true)
+	    			return;
+	    		
+	    		
+	    		
+	    		
 	    		
 	    		FormattedValues formattedValues = new FormattedValues();
 	    		JSONObject message_JSON = (JSONObject) msg.obj;
 				int success, testName, statusComplete;
 				String value;
-				
+				//SKLogger.e(this.toString(), "External Monitor updated at ");
 	    		try
 	    		{
 	    			String messageType = message_JSON.getString(StorageTestResult.JSON_TYPE_ID);
@@ -813,7 +897,7 @@ public class FragmentRunTest extends Fragment
 						
 						Pair<Float,String> valueUnits =	null;
 						
-						switch (testName)
+						switch (testName)//TODO redesign
 						{
 							// Case download test
 							case StorageTestResult.DOWNLOAD_TEST_ID:
@@ -825,8 +909,7 @@ public class FragmentRunTest extends Fragment
 								
 								valueUnits = FormattedValues.getFormattedSpeedValue(value);
 								
-								if (valueUnits.second.length() > 0) {
-Log.d(getClass().getName(), "gotResult for Download test ... at the end of the test - TODO - do this at the start!");
+								if (valueUnits.second.length() > 0) { Log.d(getClass().getName(), "gotResult for Download test ... at the end of the test - TODO - do this at the start!");
     								tv_DownloadUnits.setText(valueUnits.second);
 								}
 								
@@ -847,8 +930,7 @@ Log.d(getClass().getName(), "gotResult for Download test ... at the end of the t
 								changeUnitsInformationLabel(getString(R.string.units_Mbps));
 								
 								valueUnits = FormattedValues.getFormattedSpeedValue(value);
-								if (valueUnits.second.length() > 0) {
-Log.d(getClass().getName(), "gotResult for Upload test ... at the end of the test - TODO - do this at the start!");
+								if (valueUnits.second.length() > 0) { Log.d(getClass().getName(), "gotResult for Upload test ... at the end of the test - TODO - do this at the start!");
     								tv_UploadUnits.setText(valueUnits.second);
 								}
 								
@@ -1047,6 +1129,62 @@ Log.d(getClass().getName(), "gotResult for Upload test ... at the end of the tes
     	getActivity().runOnUiThread(runnable);
     }
     
+    
+    private void updateCurrentTestValue(final double value, final EDimension dimension){
+    	if (getActivity() == null) {
+			SKLogger.sAssert(getClass(), false);
+    		return;
+    	}
+    	
+    	String result = "";
+    	if ( dimension == EDimension.MBPS  )
+    		result = currentValueMbps(value);
+    	else if( dimension == EDimension.MSECS )
+    		result = currentValueMsecs(value);
+    	else 
+    		return;
+    	
+    	final String hlp = result;
+    	tv_Gauge_TextView_PsuedoButton.post(new Runnable()
+    			
+    			 {				
+    					@Override
+    					public void run()
+    					{
+    						tv_Gauge_TextView_PsuedoButton.setText(hlp);					
+    					}
+    				});
+    			
+    			
+    			
+    	
+    	safeRunOnUiThread(new Runnable()
+	    {				
+			@Override
+			public void run()
+			{
+				tv_Gauge_TextView_PsuedoButton.setText(hlp);					
+			}
+		});    	
+    }
+    
+    //TODO negative value
+    private String currentValueMbps(final double value){
+    	final DecimalFormat df;
+    	if (value < 10)
+    		df = new DecimalFormat("#.##");			
+    	else
+    		df = new DecimalFormat("##.#");    	
+    	
+    	return String.valueOf(df.format(value));
+    }
+    
+    //TODO negative value
+    private String currentValueMsecs(final double value){
+    	final DecimalFormat df = new DecimalFormat("#.##");
+    	return String.valueOf(df.format(value));
+    }
+    
     /**
      * Update the UI current speed indicator (in Megabytes)
      * 
@@ -1054,21 +1192,17 @@ Log.d(getClass().getName(), "gotResult for Upload test ... at the end of the tes
      */
     private void updateCurrentTestSpeedMbps(final double pCurrentSpeed)
     {
-    	final DecimalFormat df;
-    	
-    	if (pCurrentSpeed < 10)
-    	{
-    		df = new DecimalFormat("#.##");			
-		}
-    	else
-    	{
-    		df = new DecimalFormat("##.#");    		
-    	}
-    	
     	if (getActivity() == null) {
 			SKLogger.sAssert(getClass(), false);
     		return;
     	}
+    	
+    	final DecimalFormat df;
+    	if (pCurrentSpeed < 10)
+    		df = new DecimalFormat("#.##");			
+    	else
+    		df = new DecimalFormat("##.#");    		
+    	
     	
     	safeRunOnUiThread(new Runnable()
 	    {				

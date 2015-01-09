@@ -1,7 +1,10 @@
 package com.samknows.measurement;
 
 import java.io.File;
+import java.util.Observable;
+import java.util.Observer;
 
+import com.samknows.libcore.IObservable;
 import com.samknows.libcore.R;
 import com.samknows.libcore.SKConstants;
 import com.samknows.libcore.SKLogger;
@@ -17,7 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class SKApplication extends Application{
+public class SKApplication extends Application implements IObservable{
 
 	static private SKApplication sAppInstance = null;
 	
@@ -272,4 +275,55 @@ public class SKApplication extends Application{
 	double arrSegmentMaxValues_Upload[] = {0.5, 1.0, 1.5, 2.0, 10.0, 50.0};
 	return arrSegmentMaxValues_Upload;
   }
+
+
+  
+  
+/* Observable methods */
+  public class SKObservable extends Observable{
+	  public void setChanged(){
+		  super.setChanged();
+	  }
+	  
+	  public void clearChanged(){
+		  super.clearChanged();
+	  }
+  }
+  private SKObservable observable = new SKObservable();
+@Override
+public void addObserver(Observer o) {
+	observable.addObserver(o);
+}
+
+@Override
+public int countObservers() {
+	return observable.countObservers();
+}
+
+@Override
+public void deleteObserver(Observer o) {
+	observable.deleteObserver(o);
+}
+
+@Override
+public void deleteObservers() {
+	observable.deleteObservers();
+}
+
+@Override
+public boolean hasChanged() {
+	return observable.hasChanged();
+}
+
+@Override
+public void notifyObservers() {
+	observable.notifyObservers();
+}
+
+@Override
+public void notifyObservers(Object arg) {
+	observable.setChanged();
+	observable.notifyObservers(arg);
+	
+}
 }

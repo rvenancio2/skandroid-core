@@ -8,7 +8,6 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -586,4 +585,9 @@ public final class ActiveServerloadTest extends UploadTest {
 			SKLogger.sAssert(getClass(),  false);
 		}
 	};	
+	
+	@Override
+	public ETestType getType() {
+		return ETestType.S_UPLOAD;
+	}
 }

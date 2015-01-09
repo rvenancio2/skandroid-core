@@ -6,11 +6,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import android.util.Pair;
 
 import com.samknows.libcore.SKLogger;
+import com.samknows.measurement.SKApplication;
 import com.samknows.measurement.util.SKDateFormat;
 
 /*
@@ -459,6 +462,20 @@ public abstract class HttpTest extends Test {
 		sBytesPerSecondLast.set(0);
 	}
 
+	@Override
+	public double getValue(){
+	
+		double bytesPerSecondToUse = sBytesPerSecondLast.doubleValue() + sLatestSpeedForExternalMonitorBytesPerSecond.doubleValue();
+		bytesPerSecondToUse /= 2;
+
+		return (bytesPerSecondToUse * 8.0) / 1000000.0;
+	}
+	
+	@Override
+	public EDimension getDimension() {
+		return EDimension.MBPS;
+	}
+		
 	// Report-back a running average, to keep the UI moving...
 	public static Pair<Double,String> sGetLatestSpeedForExternalMonitorAsMbps() {
 		// use moving average of the last 2 items!
@@ -474,7 +491,21 @@ public abstract class HttpTest extends Test {
 		sLatestSpeedForExternalMonitorBytesPerSecond.set(bytesPerSecond);
 	}
 	
-	final protected int extMonitorUpdateInterval = 500000;
+	
+	protected Pair<Double,String> setSpeed( long currentSpeed ){
+				
+		sBytesPerSecondLast = sLatestSpeedForExternalMonitorBytesPerSecond;
+		sLatestSpeedForExternalMonitorBytesPerSecond.set(currentSpeed);
+		
+		double bytesPerSecondToUse = sBytesPerSecondLast.doubleValue() + sLatestSpeedForExternalMonitorBytesPerSecond.doubleValue();
+		bytesPerSecondToUse /= 2;
+
+		double mbps = (bytesPerSecondToUse * 8.0) / 1000000.0;
+		return new Pair<Double,String>(mbps, sLatestSpeedForExternalMonitorTestId);
+	}
+
+	
+	final protected int extMonitorUpdateInterval = 100000;
 	protected void sSetLatestSpeedForExternalMonitorInterval( long pause, String id, Callable<Integer> transferSpeed ){
 		long updateTime = 0L;
 		
@@ -496,12 +527,15 @@ public abstract class HttpTest extends Test {
 			}
 			
 			sSetLatestSpeedForExternalMonitor((long) ( currentSpeed /*/ 1000000.0*/)  , id);							/* update speed parameter + indicative ID */
-
+			
+			SKApplication.getAppInstance().notifyObservers(this);
+			
+			
 			timeElapsedSinceLastExternalMonitorUpdate.set(sGetMicroTime());											/* set new update time */
 			
-			SKLogger.e(TAG(this), "External Monitor updated at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + 
-					" as " +  ( currentSpeed / 1000000.0) +
-					" thread: " + getThreadIndex());//haha remove in production
+//			SKLogger.e(TAG(this), "External Monitor updated at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + 
+//					" as " +  ( currentSpeed / 1000000.0) +
+//					" thread: " + getThreadIndex());//haha remove in production
 		}
 	}
 
@@ -780,7 +814,8 @@ public abstract class HttpTest extends Test {
 			SKLogger.d(TAG(this), "Socket initiation failed, thread: " + threadIndex);//TODO remove in production
 			return;
 		}
-			
+	
+		
 		result = warmup(socket, threadIndex);
 		
 		if( !result )
@@ -902,8 +937,6 @@ public abstract class HttpTest extends Test {
 
 		return getBytesPerSecond(duration, btsTotal);
 	}
-
-	
 }
 
 

@@ -219,11 +219,12 @@ public class ManualTest implements Runnable {
 				} catch (InterruptedException ie) {
 					SKLogger.e(this, ie.getMessage());
 				}
-				for (JSONObject pm : progressMessage(td, manualTestExecutor)) {
-					msg = new Message();
-					msg.obj = pm;
-					mHandler.sendMessage(msg);
-				}
+//				for (JSONObject pm : progressMessage(td, manualTestExecutor)) {
+//					msg = new Message();
+//					msg.obj = pm;
+//					mHandler.sendMessage(msg);
+//					SKLogger.e(this.toString(), "Message sent:at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + pm.toString());//haha
+//				}
 
 			}
 			
@@ -258,6 +259,7 @@ public class ManualTest implements Runnable {
 				msg = new Message();
 				msg.obj = cr;
 				mHandler.sendMessage(msg);
+				SKLogger.e(this.toString(), "Message sent: at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + cr.toString());//haha
 			}
 			testsResults.addAll(currResults);
 		}
@@ -274,6 +276,7 @@ public class ManualTest implements Runnable {
 					msg = new Message();
 					msg.obj = PassiveMetric.passiveMetricToCurrentTest(o);
 					mHandler.sendMessage(msg);
+					SKLogger.e(this.toString(), "Message sent: at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date())+ PassiveMetric.passiveMetricToCurrentTest(o).toString());//haha
 					// save metric
 					passiveMetrics.add(o);
 				}
@@ -315,6 +318,7 @@ public class ManualTest implements Runnable {
 							+ e.getMessage());
 		}
 		mHandler.sendMessage(msg);
+		SKLogger.e(this.toString(), "Message sent: at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + jtc.toString());//haha
 
 		try {
 			// Submitting test results

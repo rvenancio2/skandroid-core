@@ -7,12 +7,19 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Observable;
 import java.util.concurrent.Callable;
 
+
+
+
+
 import com.samknows.libcore.SKLogger;
+import com.samknows.measurement.SKApplication;
 
 public final class DownloadTest extends HttpTest {
 	private byte[] buff = new byte[downloadBufferSize];
@@ -186,6 +193,11 @@ public final class DownloadTest extends HttpTest {
 	public int getNetUsage() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+	
+	@Override
+	public ETestType getType() {
+		return ETestType.DOWNLOAD;
 	}
 }
 
