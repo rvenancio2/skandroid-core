@@ -290,7 +290,7 @@ public class TestExecutor {
 		try {
 			List<Param> params = tc.paramsManager.prepareParams(td.params);
 
-			executingTest = TestFactory.create(td.type, params);
+			executingTest = TestFactory.create(td.type, params);//hehe TestFactory entry here
 			if (executingTest != null) {
 				getPartialResult();
 				SKLogger.d(TestExecutor.class, "start to execute test: " + td.displayName);

@@ -584,10 +584,10 @@ public final class ActiveServerloadTest extends UploadTest {
 			// This must be overridden!
 			SKLogger.sAssert(getClass(),  false);
 		}
-	};	
-	
+	}
+
 	@Override
 	public ETestType getType() {
 		return ETestType.S_UPLOAD;
-	}
+	};	
 }

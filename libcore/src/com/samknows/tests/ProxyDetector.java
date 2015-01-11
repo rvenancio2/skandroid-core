@@ -1,7 +1,5 @@
 package com.samknows.tests;
 
-
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -9,7 +7,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class ProxyDetector extends Test{
 
@@ -148,10 +145,7 @@ public class ProxyDetector extends Test{
 		return false;
 	}
 
-	@Override
-	public int getProgress() {		
-		return 0;
-	}
+	
 
 	@Override
 	public boolean isReady() {
@@ -207,6 +201,25 @@ public class ProxyDetector extends Test{
 	@Override
 	public HashMap<String, String> getResults() {
 		return null;
+	}
+	@Override
+	public int getProgress() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public double getValue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+	@Override
+	public EDimension getDimension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public ETestType getType() {
+		return ETestType.PROXY_DETECTOR;
 	}
 	
 }

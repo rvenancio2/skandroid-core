@@ -194,7 +194,7 @@ public final class DownloadTest extends HttpTest {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 	@Override
 	public ETestType getType() {
 		return ETestType.DOWNLOAD;

@@ -6,13 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -22,7 +20,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import android.util.Pair;
 
 import com.samknows.libcore.SKLogger;
-import com.samknows.measurement.SKApplication;
 import com.samknows.measurement.util.SKDateFormat;
 
 /*
@@ -461,21 +458,20 @@ public abstract class HttpTest extends Test {
 		sLatestSpeedForExternalMonitorBytesPerSecond.set(0);
 		sBytesPerSecondLast.set(0);
 	}
-
+		
 	@Override
-	public double getValue(){
-	
+	public double getValue() {
 		double bytesPerSecondToUse = sBytesPerSecondLast.doubleValue() + sLatestSpeedForExternalMonitorBytesPerSecond.doubleValue();
 		bytesPerSecondToUse /= 2;
 
 		return (bytesPerSecondToUse * 8.0) / 1000000.0;
 	}
-	
+
 	@Override
 	public EDimension getDimension() {
 		return EDimension.MBPS;
 	}
-		
+	
 	// Report-back a running average, to keep the UI moving...
 	public static Pair<Double,String> sGetLatestSpeedForExternalMonitorAsMbps() {
 		// use moving average of the last 2 items!
@@ -528,7 +524,7 @@ public abstract class HttpTest extends Test {
 			
 			sSetLatestSpeedForExternalMonitor((long) ( currentSpeed /*/ 1000000.0*/)  , id);							/* update speed parameter + indicative ID */
 			
-			SKApplication.getAppInstance().notifyObservers(this);
+		
 			
 			
 			timeElapsedSinceLastExternalMonitorUpdate.set(sGetMicroTime());											/* set new update time */

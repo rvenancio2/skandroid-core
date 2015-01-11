@@ -1,7 +1,6 @@
 package com.samknows.tests;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class TriggerTest extends Test {
 
@@ -197,6 +196,23 @@ public class TriggerTest extends Test {
 	public HashMap<String, String> getResults() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public double getValue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public EDimension getDimension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ETestType getType() {
+		return ETestType.TRIGGER;
 	}
 
 }

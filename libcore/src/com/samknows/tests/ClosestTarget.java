@@ -727,4 +727,21 @@ public class ClosestTarget extends Test {
 			initialised = false;
 		}
 	}
+
+	@Override
+	public double getValue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public EDimension getDimension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ETestType getType() {
+		return ETestType.CLOSEST_TARGET;
+	}
 }

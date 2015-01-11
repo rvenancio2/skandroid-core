@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
 
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Pair;
+
 
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.SKApplication;
@@ -571,7 +571,22 @@ public class LatencyTest extends Test {
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+
+	@Override
+	public double getValue() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+
+	@Override
+	public EDimension getDimension() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	@Override
 	public ETestType getType() {
 		return ETestType.LATENCY;

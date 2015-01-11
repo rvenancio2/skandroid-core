@@ -79,7 +79,7 @@ import com.samknows.tests.ITest;
  */
 
 
-public class FragmentRunTest extends Fragment implements Observer
+public class FragmentRunTest extends Fragment 
 {
 	// *** CONSTANTS *** //
 	private final static String C_TAG_FRAGMENT_SPEED_TEST = "Fragment SpeedTest";	// Tag for this fragment
@@ -204,7 +204,7 @@ public class FragmentRunTest extends Fragment implements Observer
         
 		// Start the periodic timer!
         //startTimer();
-        SKApplication.getAppInstance().addObserver(this);
+ //hehe      
 
         // Add the listener to the telephonyManager to listen for changes in the data connectivity
         telephonyManager.listen(phoneStateListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
@@ -228,7 +228,7 @@ public class FragmentRunTest extends Fragment implements Observer
 
 		// Stop the periodic timer!
 		//stopTimer();
-        SKApplication.getAppInstance().deleteObserver(this);
+ //hehe
 
         //Remove the telephonyManager listener
         telephonyManager.listen(null, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
@@ -304,24 +304,6 @@ public class FragmentRunTest extends Fragment implements Observer
 //    }
    
     static double lastPolledSpeedValueMbps = 0;
-       
-    @Override
-	public void update(Observable observable, Object data) {
-		if (data instanceof ITest){
-			ITest currentTest = (ITest) data;
-			double value = currentTest.getValue();
-			EDimension dimension = currentTest.getDimension();
-			
-			if (value != lastPolledSpeedValueMbps) {
-				SKLogger.e(this.toString(), "Value updated:at " + (new java.text.SimpleDateFormat("HH:mm:ss.SSS")).format(new java.util.Date()) + value);//haha
-				lastPolledSpeedValueMbps = value;
-				//String message = String.valueOf(value);
-				updateCurrentTestValue(value, dimension);								// Update the current result meter for download/upload
-				gaugeView.setAngleByValue(value);										// Update the gauge colour indicator (in Megabytes)
-				lastTimeMillisCurrentSpeed = System.currentTimeMillis();				// Register the time of the last UI update
-			}
-		}
-	}
     
 //    private void startTimer() {
 //    	

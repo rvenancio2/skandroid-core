@@ -1,17 +1,8 @@
 package com.samknows.tests;
 
-
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
-//import java.util.Vector;
-
-import java.util.Observable;
-import java.util.Observer;
-
 import org.json.JSONObject;
-
-import android.util.Pair;
 
 import com.samknows.libcore.SKLogger;
 
@@ -175,22 +166,6 @@ abstract public class Test implements Runnable, ITest {
 			errorString = error;
 		}
 	}
-//haha
-	@Override
-	public double getValue() {
-		// TODO Auto-generated method stub
-		return 0.0;
-	}
-
-	@Override
-	public EDimension getDimension() {
-		// TODO Auto-generated method stub
-		return null;
-	}	
 	
-	@Override
-	public ETestType getType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	abstract public int getProgress();
 }
