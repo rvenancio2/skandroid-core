@@ -2,9 +2,14 @@ package com.samknows.measurement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+
 
 
 import com.samknows.libcore.R;
@@ -34,13 +39,23 @@ import android.os.Message;
  * implements a runnable interface and and uses an Handler in order to publish
  * the tests results to the interface
  */
-public class ManualTest implements Runnable {
-	private Handler mHandler;
+public class ManualTest implements Runnable, Observer {
+	private Handler mHandler, localHandler;
 	private List<TestDescription> mTestDescription;
 	private Context ctx;
 	private AtomicBoolean run = new AtomicBoolean(true);
 	public static boolean isExecuting = false;
 
+	private void init(){
+		localHandler = new Handler() {
+		      @Override
+		      public void handleMessage(Message msg) {
+		        //TODO here request current ITest stats from 
+		      }
+
+		    };
+	}
+	
 	ManualTest(Context ctx, Handler handler, List<TestDescription> td) {
 		mHandler = handler;
 		mTestDescription = td;
@@ -400,5 +415,11 @@ public class ManualTest implements Runnable {
 	public void stop() {
 		
 		run.set(false);
+	}
+
+	@Override
+	public void update(Observable observable, Object data) {
+		// TODO Auto-generated method stub
+		
 	}
 }

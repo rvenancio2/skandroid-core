@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class SKApplication extends Application{
+public class SKApplication extends Application implements IObservable{
 
 	static private SKApplication sAppInstance = null;
 	
@@ -275,5 +275,56 @@ public class SKApplication extends Application{
 	double arrSegmentMaxValues_Upload[] = {0.5, 1.0, 1.5, 2.0, 10.0, 50.0};
 	return arrSegmentMaxValues_Upload;
   }
+
+ 
+ private class lObservable extends Observable{
+	 @Override
+	 public void	setChanged(){
+		 super.setChanged();
+	 }
+	 @Override
+	 public void clearChanged(){
+		 super.clearChanged();
+	 }
+ } 
+  
+ private lObservable ob = new lObservable();
+ 
+@Override
+public void addObserver(Observer o) {
+	ob.addObserver(o);
+}
+
+@Override
+public int countObservers() {
+	return ob.countObservers();
+}
+
+@Override
+public void deleteObserver(Observer o) {
+	ob.deleteObserver(o);	
+}
+
+@Override
+public void deleteObservers() {
+	ob.deleteObservers();
+}
+
+@Override
+public boolean hasChanged() {
+	return ob.hasChanged();
+}
+
+@Override
+public void notifyObservers() {
+	ob.setChanged();
+	ob.notifyObservers();
+}
+
+@Override
+public void notifyObservers(Object arg) {
+	ob.setChanged();
+	ob.notifyObservers(arg);
+}
 
 }
