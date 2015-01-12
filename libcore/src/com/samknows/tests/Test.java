@@ -2,9 +2,11 @@ package com.samknows.tests;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.json.JSONObject;
 
 import com.samknows.libcore.SKLogger;
+import com.samknows.tests.interfaces.ITest;
 
 
 //Base class for the tests 

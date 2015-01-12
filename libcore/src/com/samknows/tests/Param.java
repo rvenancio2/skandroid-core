@@ -10,7 +10,10 @@ public class Param implements Serializable{
 		return this.name.equalsIgnoreCase(name);
 	}
 
-	public Param(String name, String value){
+	public Param(String name, String value) throws IllegalArgumentException{
+		if( name == null || value == null )
+			throw new IllegalArgumentException();
+
 		this.name = name.toLowerCase(Locale.ENGLISH);
 		this.value = value;
 	}
@@ -20,16 +23,16 @@ public class Param implements Serializable{
 	public boolean isName(String n){
 		return name.equalsIgnoreCase(n);
 	}
-	
+
 	public boolean isValue(String v){
 		return value.equalsIgnoreCase(v);
 	}
-	
+
 	public String getValue(){
 		return value;
 	}
-	
-	
+
+
 	private String name = "";
 	private String value ="";
 }

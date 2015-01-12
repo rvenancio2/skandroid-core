@@ -11,9 +11,9 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
-public class SKOperatorsTests {
+public class JSKOperators {
 
-	public SKOperatorsTests() {
+	public JSKOperators() {
 		// TODO Auto-generated constructor stub
 	}
 

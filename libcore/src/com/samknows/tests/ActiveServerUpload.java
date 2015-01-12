@@ -15,9 +15,10 @@ import android.annotation.SuppressLint;
 
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.util.OtherUtils;
+import com.samknows.tests.interfaces.ETestType;
 
 @SuppressLint("UseSparseArrays")
-public final class ActiveServerloadTest extends UploadTest {
+public final class ActiveServerUpload extends Upload {
 	private boolean bGotValidResponseFromServer = false;
 	//private boolean bReadThreadIsRunning = 		true;				/* True if thread from Server still running */
 
@@ -35,7 +36,7 @@ public final class ActiveServerloadTest extends UploadTest {
 	private long mSessionID = -1L;	
 	//private HashMap<Integer, ServerInStreamThread> readThreads = new HashMap<Integer, ServerInStreamThread>();
 
-	public ActiveServerloadTest(List<Param> params){
+	public ActiveServerUpload(List<Param> params){
 		super(params);
 		setSessionID();
 	}

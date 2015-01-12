@@ -21,11 +21,19 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 
+
+
+
+
+
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.SKApplication;
 import com.samknows.measurement.util.SKDateFormat;
+import com.samknows.tests.formats.JsonData;
+import com.samknows.tests.interfaces.EDimension;
+import com.samknows.tests.interfaces.ETestType;
 
-public class LatencyTest extends Test {
+public class Latency extends Test {
 
 	public static final String STRING_ID = "JUDPLATENCY";
 	public static final int STATUSFIELD = 2;
@@ -34,13 +42,15 @@ public class LatencyTest extends Test {
 	public static final int AVERAGEFIELD = 5;
 	private static final String LATENCYRUN = "Running latency and loss tests";
 	private static final String LATENCYDONE = "Latency and loss tests completed";
-
-	public static final String JSON_RTT_AVG = "rtt_avg";
-	public static final String JSON_RTT_MIN = "rtt_min";
-	public static final String JSON_RTT_MAX = "rtt_max";
-	public static final String JSON_RTT_STDDEV = "rtt_stddev";
-	public static final String JSON_RECEIVED_PACKETS = "received_packets";
-	public static final String JSON_LOST_PACKETS = "lost_packets";
+	
+	/*
+	 * constants for creating a latency test
+	 */
+	private static final String NUMBEROFPACKETS = "numberOfPackets";
+	private static final String DELAYTIMEOUT = "delayTimeout";
+	private static final String INTERPACKETTIME = "interPacketTime";
+	private static final String PERCENTILE = "percentile";
+	private static final String MAXTIME = "maxTime";
 
 	static public class Result {
 		public String target;
@@ -60,7 +70,7 @@ public class LatencyTest extends Test {
 			try {
 				bq_results.put(r);
 			} catch (InterruptedException e) {
-				SKLogger.sAssert(LatencyTest.class, false);
+				SKLogger.sAssert(Latency.class, false);
 			}
 		}
 	}
@@ -137,29 +147,30 @@ public class LatencyTest extends Test {
 			arrayRepresentation[11] = (byte) (starttimeusec);
 		}
 	}
-
-	public LatencyTest() {
+	
+	public Latency(List<Param> params){
+		setParams(params);
 	}
 
 	public String getStringID() {
 		return STRING_ID;
 	}
 
-	public LatencyTest(String server, int port, int numdatagrams) {
+	/*public Latency(String server, int port, int numdatagrams) {
 		this.numdatagrams = numdatagrams;
 		results = new long[numdatagrams];
 	}
 
-	public LatencyTest(String server, int port, int numdatagrams,
+	public Latency(String server, int port, int numdatagrams,
 			int interPacketTime) {
 		target = server;
 		this.port = port;
 		this.numdatagrams = numdatagrams;
 		results = new long[numdatagrams];
 		this.interPacketTime = interPacketTime * 1000; // nanoSeconds
-	}
+	}*/
 
-	public LatencyTest(String server, int port, int numdatagrams,
+	public Latency(String server, int port, int numdatagrams,
 			int interPacketTime, int delayTimeout) {
 		target = server;
 		this.port = port;
@@ -303,23 +314,23 @@ public class LatencyTest extends Test {
 		output.put(JsonData.JSON_TARGET_IPADDRESS, ipAddress);
 		// average
 		o.add(Long.toString(((long)(averageNanoseconds / 1000))));
-		output.put(JSON_RTT_AVG, (long) (averageNanoseconds / 1000));
+		output.put(JsonData.JSON_RTT_AVG, (long) (averageNanoseconds / 1000));
 		// minimum
 		o.add(Long.toString(minimumNanoseconds / 1000));
-		output.put(JSON_RTT_MIN, minimumNanoseconds / 1000);
+		output.put(JsonData.JSON_RTT_MIN, minimumNanoseconds / 1000);
 		// maximum
 		o.add(Long.toString(maximumNanoseconds / 1000));
-		output.put(JSON_RTT_MAX, maximumNanoseconds /1000);
+		output.put(JsonData.JSON_RTT_MAX, maximumNanoseconds /1000);
 		// standard deviation
 		o.add(Long.toString((long) (stddeviationNanoseconds / 1000)));
 		
-		output.put(JSON_RTT_STDDEV,(long) (stddeviationNanoseconds / 1000));
+		output.put(JsonData.JSON_RTT_STDDEV,(long) (stddeviationNanoseconds / 1000));
 		// recvPackets
 		o.add(Integer.toString(recvPackets));
-		output.put(JSON_RECEIVED_PACKETS, recvPackets);
+		output.put(JsonData.JSON_RECEIVED_PACKETS, recvPackets);
 		// lost packets
 		o.add(Integer.toString(sentPackets - recvPackets));
-		output.put(JSON_LOST_PACKETS, sentPackets - recvPackets);
+		output.put(JsonData.JSON_LOST_PACKETS, sentPackets - recvPackets);
 		setOutput(o.toArray(new String[1]));
 		setJSONResult(output);
 	}
@@ -494,32 +505,32 @@ public class LatencyTest extends Test {
 
 	}
 
-	public void setTarget(String target) {
+	private void setTarget(String target) {
 		this.target = target;
 	}
 
-	public void setPort(int port) {
+	private void setPort(int port) {
 		this.port = port;
 	}
 
-	public void setNumberOfDatagrams(int n) {
+	private void setNumberOfDatagrams(int n) {
 		numdatagrams = n;
 		results = new long[numdatagrams];
 	}
 
-	public void setDelayTimeout(int delay) {
+	private void setDelayTimeout(int delay) {
 		delayTimeout = delay / 1000;
 	}
 
-	public void setInterPacketTime(int time) {
+	private void setInterPacketTime(int time) {
 		interPacketTime = time * 1000; // nanoSeconds
 	}
 
-	public void setPercentile(int n) {
+	private void setPercentile(int n) {
 		percentile = n;
 	}
 
-	public void setMaxExecutionTime(long time) {
+	private void setMaxExecutionTime(long time) {
 		maxExecutionTimeNanoseconds = time * 1000; // nanoSeconds
 	}
 
@@ -568,8 +579,30 @@ public class LatencyTest extends Test {
 	private BlockingQueue<Result> bq_results = null;
 	
 	final private void setParams(List<Param> params) {
-		// TODO Auto-generated method stub
-		
+		try {
+			for (Param param : params) {
+				String value = param.getValue();
+				if (param.contains(TARGET)) {
+					setTarget(value);
+				} else if (param.contains( PORT)) {
+					setPort(Integer.parseInt(value));
+				} else if (param.contains( NUMBEROFPACKETS)) {
+					setNumberOfDatagrams(Integer.parseInt(value));
+				} else if (param.contains( DELAYTIMEOUT)) {
+					setDelayTimeout(Integer.parseInt(value));
+				} else if (param.contains( INTERPACKETTIME)) {
+					setInterPacketTime(Integer.parseInt(value));
+				} else if (param.contains( PERCENTILE)) {
+					setPercentile(Integer.parseInt(value));
+				} else if (param.contains( MAXTIME)) {
+					setMaxExecutionTime(Long.parseLong(value));
+				} else {
+					break;
+				}
+			}
+		} catch (NumberFormatException nfe) {
+			return;
+		}
 	}
 
 

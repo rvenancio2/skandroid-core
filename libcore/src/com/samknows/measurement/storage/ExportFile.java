@@ -31,9 +31,9 @@ import com.samknows.measurement.schedule.condition.CpuActivityCondition;
 import com.samknows.measurement.schedule.condition.DatacapCondition;
 import com.samknows.measurement.schedule.condition.NetActivityCondition;
 import com.samknows.tests.ClosestTarget;
-import com.samknows.tests.HttpTest;
-import com.samknows.tests.JsonData;
-import com.samknows.tests.LatencyTest;
+import com.samknows.tests.Http;
+import com.samknows.tests.Latency;
+import com.samknows.tests.formats.JsonData;
 
 
 public class ExportFile {
@@ -58,7 +58,7 @@ public class ExportFile {
 	public static final String[] HTTP_FIELDS = {JsonData.JSON_TYPE, JsonData.JSON_TIMESTAMP, JsonData.JSON_DATETIME, JsonData.JSON_TARGET, JsonData.JSON_TARGET_IPADDRESS, JsonData.JSON_SUCCESS, 
 		JsonData.JSON_TRANFERTIME, JsonData.JSON_TRANFERBYTES, JsonData.JSON_BYTES_SEC, JsonData.JSON_WARMUPTIME, JsonData.JSON_WARMUPBYTES, JsonData.JSON_NUMBER_OF_THREADS};
 	public static final String[] LATENCY_FIELDS = {JsonData.JSON_TYPE, JsonData.JSON_TIMESTAMP, JsonData.JSON_DATETIME, JsonData.JSON_TARGET, JsonData.JSON_TARGET_IPADDRESS, JsonData.JSON_SUCCESS,
-		LatencyTest.JSON_RTT_AVG, LatencyTest.JSON_RTT_MIN, LatencyTest.JSON_RTT_MAX, LatencyTest.JSON_RTT_STDDEV, LatencyTest.JSON_RECEIVED_PACKETS, LatencyTest.JSON_LOST_PACKETS};
+		JsonData.JSON_RTT_AVG, JsonData.JSON_RTT_MIN, JsonData.JSON_RTT_MAX, JsonData.JSON_RTT_STDDEV, JsonData.JSON_RECEIVED_PACKETS, JsonData.JSON_LOST_PACKETS};
 	public static final String[] CLOSESTTARGET_FIELDS = {JsonData.JSON_TYPE, JsonData.JSON_TIMESTAMP, JsonData.JSON_DATETIME, JsonData.JSON_SUCCESS, ClosestTarget.JSON_CLOSETTARGET, ClosestTarget.JSON_IPCLOSESTTARGET};
 	
 	//metrics data
@@ -78,11 +78,11 @@ public class ExportFile {
 	private static final Map<String, String[]> convertor;
 	static{
 		Map <String, String[]> aMap = new HashMap<String, String[]>();
-		aMap.put(HttpTest.DOWNSTREAMMULTI, HTTP_FIELDS);
-		aMap.put(HttpTest.DOWNSTREAMSINGLE, HTTP_FIELDS);
-		aMap.put(HttpTest.UPSTREAMMULTI, HTTP_FIELDS);
-		aMap.put(HttpTest.UPSTREAMSINGLE, HTTP_FIELDS);
-		aMap.put(LatencyTest.STRING_ID, LATENCY_FIELDS);
+		aMap.put(Http.DOWNSTREAMMULTI, HTTP_FIELDS);
+		aMap.put(Http.DOWNSTREAMSINGLE, HTTP_FIELDS);
+		aMap.put(Http.UPSTREAMMULTI, HTTP_FIELDS);
+		aMap.put(Http.UPSTREAMSINGLE, HTTP_FIELDS);
+		aMap.put(Latency.STRING_ID, LATENCY_FIELDS);
 		aMap.put(ClosestTarget.TESTSTRING, CLOSESTTARGET_FIELDS);
 		aMap.put(LocationData.JSON_LOCATION, LOCATION_FIELDS);
 		aMap.put(NetworkData.JSON_TYPE_VALUE, NETWORKDATA_FIELDS);

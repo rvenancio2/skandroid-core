@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 @RunWith(RobolectricTestRunner.class)
-public class LocaleTests {
+public class JLocale {
 
 	@Test
 	public void testDateFormatingOfDoubles() throws Exception{

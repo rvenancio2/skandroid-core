@@ -18,14 +18,16 @@ import java.util.concurrent.Callable;
 
 
 
+
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.SKApplication;
+import com.samknows.tests.interfaces.ETestType;
 
-public final class DownloadTest extends HttpTest {
+public final class Download extends Http {
 	private byte[] buff = new byte[downloadBufferSize];
 	private int readBytes = 0;
 
-	public DownloadTest(List<Param> params){
+	public Download(List<Param> params){
 		super(_DOWNSTREAM, params);
 	}
 

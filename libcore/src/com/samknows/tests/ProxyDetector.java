@@ -8,6 +8,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.samknows.tests.interfaces.EDimension;
+import com.samknows.tests.interfaces.ETestType;
+
 public class ProxyDetector extends Test{
 
 	private static final String X_REMOTE_ADDR = "X-Remote-Addr";

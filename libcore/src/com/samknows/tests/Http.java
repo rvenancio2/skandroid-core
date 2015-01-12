@@ -21,6 +21,8 @@ import android.util.Pair;
 
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.util.SKDateFormat;
+import com.samknows.tests.formats.JsonData;
+import com.samknows.tests.interfaces.EDimension;
 
 /*
 NOTES: See also https://svn.samknows.com/svn/tests/http_server/trunk/docs/protocol.txt ... where the protocol
@@ -142,7 +144,7 @@ MEASUR_SESSION 10 0 15000000\n
  }
  */
 
-public abstract class HttpTest extends Test {
+public abstract class Http extends Test {
 	// @property (weak) SKTransferOperation *mpParentTransferOperation;
 	// @property int mSocketFd;
 	
@@ -207,7 +209,7 @@ public abstract class HttpTest extends Test {
 	protected long sGetMicroTime() {return System.nanoTime()/1000L;   }
 	protected long sGetMilliTime() {return System.nanoTime()/1000000L;}
 
-	protected  HttpTest(String direction, List<Param> params) {					/* Constructor. Accepts list of Param objects, each representing a certain parameter read from settings XML file */	
+	protected  Http(String direction, List<Param> params) {					/* Constructor. Accepts list of Param objects, each representing a certain parameter read from settings XML file */	
 		setDirection(direction);											/* Legacy. To be removed */
 		sLatestSpeedReset();												/* Reset speed counter for external client (GUI, etc) */
 		

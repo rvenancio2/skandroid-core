@@ -2,7 +2,7 @@ package com.samknows.tests;
 
 //import com.samknows.libcore.SKLogger;
 import com.samknows.tests.Param;
-import com.samknows.tests.HttpTest.UploadStrategy;
+import com.samknows.tests.Http.UploadStrategy;
 
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -81,15 +81,15 @@ public class TestFactory {
 			for(Param p: params){
 				
 				if(p.contains(NTHREADS))
-					ret = Integer.parseInt(p.getValue()) == 1 ? HttpTest.DOWNSTREAMSINGLE : HttpTest.DOWNSTREAMMULTI; 
+					ret = Integer.parseInt(p.getValue()) == 1 ? Http.DOWNSTREAMSINGLE : Http.DOWNSTREAMMULTI; 
 			}
 		}else if(testType.equalsIgnoreCase( UPSTREAMTHROUGHPUT)){
 			for(Param p: params){
 				if(p.contains(NTHREADS))
-					ret = Integer.parseInt(p.getValue()) == 1 ? HttpTest.UPSTREAMSINGLE : HttpTest.UPSTREAMMULTI; 
+					ret = Integer.parseInt(p.getValue()) == 1 ? Http.UPSTREAMSINGLE : Http.UPSTREAMMULTI; 
 			}
 		}else if (testType.equalsIgnoreCase(LATENCY)){
-			ret = LatencyTest.STRING_ID;
+			ret = Latency.STRING_ID;
 		}
 		return ret;
 	}
@@ -141,43 +141,21 @@ public class TestFactory {
 		return ret;
 	}
 
-	private static LatencyTest createLatencyTest(List<Param> params) {//TODO to complete
-		LatencyTest ret = new LatencyTest();
-
-		try {
-			for (Param param : params) {
-				String value = param.getValue();
-				if (param.contains(TARGET)) {
-					ret.setTarget(value);
-				} else if (param.contains( PORT)) {
-					ret.setPort(Integer.parseInt(value));
-				} else if (param.contains( NUMBEROFPACKETS)) {
-					ret.setNumberOfDatagrams(Integer.parseInt(value));
-				} else if (param.contains( DELAYTIMEOUT)) {
-					ret.setDelayTimeout(Integer.parseInt(value));
-				} else if (param.contains( INTERPACKETTIME)) {
-					ret.setInterPacketTime(Integer.parseInt(value));
-				} else if (param.contains( PERCENTILE)) {
-					ret.setPercentile(Integer.parseInt(value));
-				} else if (param.contains( MAXTIME)) {
-					ret.setMaxExecutionTime(Long.parseLong(value));
-				} else {
-					ret = null;
-					break;
-				}
-			}
-		} catch (NumberFormatException nfe) {
-			ret = null;
-		}
-		return ret;
+	private static Latency createLatencyTest(List<Param> params) {//TODO to complete
+		Latency ret = new Latency(params);
+		
+		if (ret.isReady())
+			return ret;
+		else
+			return null;
 	}
 
-	private static HttpTest createHttpTest(String direction, List<Param> params) {
+	private static Http createHttpTest(String direction, List<Param> params) {
 		UploadStrategy uploadStrategyServerBased = UploadStrategy.PASSIVE;
-		HttpTest result = null;
+		Http result = null;
 	
 		if ( direction == DOWNSTREAM ){
-			result = new DownloadTest( params );
+			result = new Download( params );
 		}
 		else if ( direction == UPSTREAM ){
 			
@@ -189,9 +167,9 @@ public class TestFactory {
 			}
 		
 			if ( uploadStrategyServerBased ==  UploadStrategy.ACTIVE )
-				result = new ActiveServerloadTest( params );
+				result = new ActiveServerUpload( params );
 			else
-				result = new PassiveServerUploadTest( params);
+				result = new PassiveServerUpload( params);
 		}
 		
 		if( result != null )
@@ -270,7 +248,7 @@ public class TestFactory {
 		long ret = 0;
 		for(Param p: params){
 			if(p.isName(NUMBEROFPACKETS)){
-				ret = Long.parseLong(p.getValue()) * LatencyTest.getPacketSize(); 
+				ret = Long.parseLong(p.getValue()) * Latency.getPacketSize(); 
 			}
 		}
 		return ret;

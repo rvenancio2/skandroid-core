@@ -1,4 +1,4 @@
-package com.samknows.tests;
+package com.samknows.tests.formats;
 
 public final class JsonData {
 	/* General data */
@@ -16,4 +16,12 @@ public final class JsonData {
 	public static final String JSON_WARMUPTIME = "warmup_time";
 	public static final String JSON_WARMUPBYTES = "warmup_bytes";
 	public static final String JSON_NUMBER_OF_THREADS = "number_of_threads";
+	
+	/* Latency data */
+	public static final String JSON_RTT_AVG = "rtt_avg";
+	public static final String JSON_RTT_MIN = "rtt_min";
+	public static final String JSON_RTT_MAX = "rtt_max";
+	public static final String JSON_RTT_STDDEV = "rtt_stddev";
+	public static final String JSON_RECEIVED_PACKETS = "received_packets";
+	public static final String JSON_LOST_PACKETS = "lost_packets";
 }

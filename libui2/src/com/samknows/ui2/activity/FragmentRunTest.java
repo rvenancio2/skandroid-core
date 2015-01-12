@@ -68,8 +68,8 @@ import com.samknows.measurement.activity.components.FontFitTextView;
 import com.samknows.measurement.schedule.ScheduleConfig;
 import com.samknows.measurement.storage.DBHelper;
 import com.samknows.measurement.storage.StorageTestResult;
-import com.samknows.tests.EDimension;
-import com.samknows.tests.ITest;
+import com.samknows.tests.interfaces.EDimension;
+import com.samknows.tests.interfaces.ITest;
 
 /**
  * This fragment is responsible for running the tests and managing the home screen.

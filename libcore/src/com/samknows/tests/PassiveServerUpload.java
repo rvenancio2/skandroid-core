@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.samknows.libcore.SKLogger;
+import com.samknows.tests.interfaces.ETestType;
 
-public class PassiveServerUploadTest extends UploadTest {
+public class PassiveServerUpload extends Upload {
 
-	public PassiveServerUploadTest(List<Param> params){
+	public PassiveServerUpload(List<Param> params){
 		super(params);
 	}
 	

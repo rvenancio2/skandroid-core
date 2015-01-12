@@ -2,7 +2,10 @@ package com.samknows.tests;
 
 import java.util.HashMap;
 
-public class TriggerTest extends Test {
+import com.samknows.tests.interfaces.EDimension;
+import com.samknows.tests.interfaces.ETestType;
+
+public class Trigger extends Test {
 
 	@Override
 	public void execute() {

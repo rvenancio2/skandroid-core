@@ -9,12 +9,12 @@ import java.util.Random;
 
 import com.samknows.libcore.SKLogger;
 
-public abstract class UploadTest extends HttpTest {
+public abstract class Upload extends Http {
 		
 	protected double bitrateMpbs1024Based = 		-1.0;			/* ???? Scale coefficient */
 	protected byte[] buff;											/* buffer to send values */
 	
-	protected UploadTest(List<Param> params){
+	protected Upload(List<Param> params){
 		super(_UPSTREAM, params);
 		this.init();
 	}

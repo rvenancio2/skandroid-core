@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 @RunWith(RobolectricTestRunner.class)
-public class CoreTests {
+public class JCore {
 
 //    public void testStringResource() throws Exception {
 ////        String hello = new MyActivity().getResources().getString(R.string.hello);

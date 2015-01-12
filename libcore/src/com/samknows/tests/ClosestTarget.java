@@ -31,7 +31,10 @@ import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.ManualTest;
 import com.samknows.measurement.SKApplication;
 import com.samknows.measurement.util.SKDateFormat;
-import com.samknows.tests.LatencyTest;
+import com.samknows.tests.Latency;
+import com.samknows.tests.formats.JsonData;
+import com.samknows.tests.interfaces.EDimension;
+import com.samknows.tests.interfaces.ETestType;
 
 public class ClosestTarget extends Test {
 	
@@ -79,7 +82,7 @@ public class ClosestTarget extends Test {
 	}
 	
 	//Used to collect the results from the individual LatencyTests as soon as the finish
-	public BlockingQueue<LatencyTest.Result> bq_results = new LinkedBlockingQueue<LatencyTest.Result>();
+	public BlockingQueue<Latency.Result> bq_results = new LinkedBlockingQueue<Latency.Result>();
 	
 	//public ClosestTarget() {
 	//	synchronized (ClosestTarget.this) {	
@@ -260,7 +263,7 @@ public class ClosestTarget extends Test {
 
 		private long measuredLatencyMilliseconds = -100L;
 		
-		LatencyTest latencyTest = null;
+		Latency latencyTest = null;
 
 		public long getMeasuredLatencyMilliseconds() {return measuredLatencyMilliseconds;}
 
@@ -274,7 +277,7 @@ public class ClosestTarget extends Test {
 			startSignal = inStartSignal;
 			doneSignal = inDoneSignal;
 			
-			latencyTest = (LatencyTest)(latencyTests[serverIndex]);
+			latencyTest = (Latency)(latencyTests[serverIndex]);
 			SKLogger.sAssert(getClass(), latencyTest.getTarget().equals(target));
 		}
 
@@ -333,7 +336,7 @@ public class ClosestTarget extends Test {
 
 				// Add a new result to the queue for display...
 				// Will be ignored if not the best yet!
-				LatencyTest.sCreateAndPushLatencyResultNanoseconds(bq_results, closestTarget, (long) curr_best_Nanoseconds);
+				Latency.sCreateAndPushLatencyResultNanoseconds(bq_results, closestTarget, (long) curr_best_Nanoseconds);
 			}
 		}
 	}
@@ -459,10 +462,10 @@ public class ClosestTarget extends Test {
 			return ret;
 		}
 		ArrayList<Thread> threads = new ArrayList<Thread>();
-		latencyTests = new LatencyTest[targets.size()];
+		latencyTests = new Latency[targets.size()];
 		
 		for (int i = 0; i < targets.size(); i++) {
-			LatencyTest lt = new LatencyTest(targets.get(i), port, nPackets,
+			Latency lt = new Latency(targets.get(i), port, nPackets,
 					interPacketTime, delayTimeout);
 			lt.setBlockingQueueResult(bq_results);
 			latencyTests[i] = lt;
@@ -485,15 +488,15 @@ public class ClosestTarget extends Test {
 		int minDist = Integer.MAX_VALUE;
 		for (int i = 0; i < targets.size(); i++) {
 			
-			if (latencyTests[i].getOutputField(LatencyTest.STATUSFIELD).equals(
+			if (latencyTests[i].getOutputField(Latency.STATUSFIELD).equals(
 					"OK")) {
 				success = true;
 				int avg = Integer.parseInt(latencyTests[i]
-						.getOutputField(LatencyTest.AVERAGEFIELD));
+						.getOutputField(Latency.AVERAGEFIELD));
 				if (avg < minDist) {
 					closestTarget = targets.get(i);
 					ipClosestTarget = latencyTests[i]
-							.getOutputField(LatencyTest.IPTARGETFIELD);
+							.getOutputField(Latency.IPTARGETFIELD);
 					minDist = avg;
 				}
 			}
@@ -663,7 +666,7 @@ public class ClosestTarget extends Test {
 		
 		Result ret = new Result();
 		try{
-			LatencyTest.Result r = bq_results.take();
+			Latency.Result r = bq_results.take();
 			ret.completed = finished;
 			
 			if (mbInHttpTestingFallbackMode == false) {

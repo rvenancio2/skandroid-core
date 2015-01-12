@@ -1,4 +1,5 @@
-package com.samknows.tests;
+package com.samknows.tests.interfaces;
+
 
 
 public interface ITest {
