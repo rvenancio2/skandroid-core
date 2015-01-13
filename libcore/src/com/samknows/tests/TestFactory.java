@@ -3,6 +3,7 @@ package com.samknows.tests;
 //import com.samknows.libcore.SKLogger;
 import com.samknows.tests.Param;
 import com.samknows.tests.Http.UploadStrategy;
+import com.samknows.tests.util.UdpDatagram;
 
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -248,7 +249,7 @@ public class TestFactory {
 		long ret = 0;
 		for(Param p: params){
 			if(p.isName(NUMBEROFPACKETS)){
-				ret = Long.parseLong(p.getValue()) * Latency.getPacketSize(); 
+				ret = Long.parseLong(p.getValue()) * UdpDatagram.getSize(); 
 			}
 		}
 		return ret;

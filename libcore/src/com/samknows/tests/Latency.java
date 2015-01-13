@@ -8,7 +8,6 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,20 +20,16 @@ import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 
 
-
-
-
-
-
 import com.samknows.libcore.SKLogger;
 import com.samknows.measurement.SKApplication;
 import com.samknows.measurement.util.SKDateFormat;
 import com.samknows.tests.formats.JsonData;
 import com.samknows.tests.interfaces.EDimension;
 import com.samknows.tests.interfaces.ETestType;
+import com.samknows.tests.util.UdpDatagram;
 
 public class Latency extends Test {
-
+	
 	public static final String STRING_ID = "JUDPLATENCY";
 	public static final int STATUSFIELD = 2;
 	public static final int TARGETFIELD = 3;
@@ -52,18 +47,10 @@ public class Latency extends Test {
 	private static final String PERCENTILE = "percentile";
 	private static final String MAXTIME = "maxTime";
 
-	static public class Result {
-		public String target;
-		public long rttMicroseconds;
 
-		public Result(String _target, long nanoseconds) {
-			target = _target;
-			rttMicroseconds = nanoseconds / 1000;
-		}
-	}
 	
 	// Used internally ... and externally, by the HttpTest fallback for ClosestTarget testing.
-	static void sCreateAndPushLatencyResultNanoseconds(BlockingQueue<Result> bq_results, String inTarget, double inRttNanoseconds) {
+/*	static void sCreateAndPushLatencyResultNanoseconds(BlockingQueue<Result> bq_results, String inTarget, double inRttNanoseconds) {
 		if (bq_results != null) {
 			// Pass-in the value in nanoseconds
      		Result r = new Result(inTarget, (long)inRttNanoseconds);
@@ -73,81 +60,23 @@ public class Latency extends Test {
 				SKLogger.sAssert(Latency.class, false);
 			}
 		}
-	}
+	}*/
 	
 
 	// Used internally ...
-	private void setLatencyValueNanoseconds(double inRttNanoseconds) {
-		sCreateAndPushLatencyResultNanoseconds(bq_results, target, inRttNanoseconds);
-	}
-	
-	public static int getPacketSize(){
-		return UdpDatagram.PACKETSIZE;
+	private void setLatencyValueNanoseconds(long inRttNanoseconds) {
+		try {
+				bq_results.put(inRttNanoseconds);
+			} catch (InterruptedException e) {
+				SKLogger.sAssert(Latency.class, false);
+			}
 	}
 
 	@SuppressWarnings("serial")
-	static private class PacketTimeOutException extends Exception{
+	private class PacketTimeOutException extends Exception{
 		
 	}
-	
-	static private class UdpDatagram {
-		static final int PACKETSIZE = 16;
-		static final int SERVERTOCLIENTMAGIC = 0x00006000;
-		static final int CLIENTTOSERVERMAGIC = 0x00009000;
-
-		int datagramid;
-		@SuppressWarnings("unused")
-		int starttimesec;
-		@SuppressWarnings("unused")
-		int starttimeusec;
-		int magic;
-
-		// When we make the "ping" we don't want to lose any time in memory
-		// allocations, as much as possible should be ready (I miss structs...)
-		byte[] arrayRepresentation;
-
-		UdpDatagram(byte[] byteArray) {
-			arrayRepresentation = byteArray;
-			ByteBuffer bb = ByteBuffer.wrap(byteArray);
-			datagramid = bb.getInt();
-			starttimesec = bb.getInt();
-			starttimeusec = bb.getInt();
-			magic = bb.getInt();
-		}
-
-		UdpDatagram(int datagramid, int magic) {
-			this.datagramid = datagramid;
-			this.magic = magic;
-			arrayRepresentation = new byte[PACKETSIZE];
-			arrayRepresentation[0] = (byte) (datagramid >>> 24);
-			arrayRepresentation[1] = (byte) (datagramid >>> 16);
-			arrayRepresentation[2] = (byte) (datagramid >>> 8);
-			arrayRepresentation[3] = (byte) (datagramid);
-			arrayRepresentation[12] = (byte) (magic >>> 24);
-			arrayRepresentation[13] = (byte) (magic >>> 16);
-			arrayRepresentation[14] = (byte) (magic >>> 8);
-			arrayRepresentation[15] = (byte) (magic);
-		}
-
-		byte[] byteArray() {
-			return arrayRepresentation;
-		}
-
-		void setTime(long time) {
-			int starttimesec = (int) (time / (int) 1e9);
-			int starttimeusec = (int) ((time / (int) 1e3) % (int) 1e6);
-
-			arrayRepresentation[4] = (byte) (starttimesec >>> 24);
-			arrayRepresentation[5] = (byte) (starttimesec >>> 16);
-			arrayRepresentation[6] = (byte) (starttimesec >>> 8);
-			arrayRepresentation[7] = (byte) (starttimesec);
-			arrayRepresentation[8] = (byte) (starttimeusec >>> 24);
-			arrayRepresentation[9] = (byte) (starttimeusec >>> 16);
-			arrayRepresentation[10] = (byte) (starttimeusec >>> 8);
-			arrayRepresentation[11] = (byte) (starttimeusec);
-		}
-	}
-	
+			
 	public Latency(List<Param> params){
 		setParams(params);
 	}
@@ -155,21 +84,7 @@ public class Latency extends Test {
 	public String getStringID() {
 		return STRING_ID;
 	}
-
-	/*public Latency(String server, int port, int numdatagrams) {
-		this.numdatagrams = numdatagrams;
-		results = new long[numdatagrams];
-	}
-
-	public Latency(String server, int port, int numdatagrams,
-			int interPacketTime) {
-		target = server;
-		this.port = port;
-		this.numdatagrams = numdatagrams;
-		results = new long[numdatagrams];
-		this.interPacketTime = interPacketTime * 1000; // nanoSeconds
-	}*/
-
+	
 	public Latency(String server, int port, int numdatagrams,
 			int interPacketTime, int delayTimeout) {
 		target = server;
@@ -180,13 +95,9 @@ public class Latency extends Test {
 		this.delayTimeout = delayTimeout / 1000; // mSeconds
 	}
 
-	public void setBlockingQueueResult(BlockingQueue<Result> queue) {
-		bq_results = queue;
-	}
-
 	@Override
 	public int getNetUsage() {
-		return UdpDatagram.PACKETSIZE * (sentPackets + recvPackets);
+		return UdpDatagram.getSize() * (sentPackets + recvPackets);
 	}
 
 	// @SuppressLint("NewApi")
@@ -338,11 +249,12 @@ public class Latency extends Test {
 	@Override
 	public void run() {
 		start();
-		//set to zero internal variables in case the same test object is executed severals times 
-		sentPackets=0;
+		
+		sentPackets=0;															/* set to zero internal variables in case the same test object is executed severals times */
 		recvPackets=0;
-		startTimeNanonseconds = System.nanoTime();
-		DatagramSocket socket = null;
+		startTimeNanonseconds = System.nanoTime();								/* Memorise start time  */
+		
+		DatagramSocket socket = null;											/* Initialise socket */
 		try {
 			socket = new DatagramSocket();
 			socket.setSoTimeout(delayTimeout);
@@ -362,7 +274,7 @@ public class Latency extends Test {
 
 		InetAddress address = null;
 		try {
-			address = InetAddress.getByName(target);
+			address = InetAddress.getByName(target);							/* Try to setup socket. If socket fails report FAIL output */
 			ipAddress = address.getHostAddress();
 		} catch (UnknownHostException e) {
 			failure();
@@ -370,22 +282,24 @@ public class Latency extends Test {
      		socket = null;
 			return;
 		}
-		for (int i = 0; i < numdatagrams; ++i) {
+		for (int i = 0; i < numdatagrams; ++i) {								/* For required number of datagrams - run test */
 			
-			if ((maxExecutionTimeNanoseconds > 0)
-					&& (System.nanoTime() - startTimeNanonseconds > maxExecutionTimeNanoseconds)) {
+			if ((maxExecutionTimeNanoseconds > 0)								/* If out of break cycle */						
+					&& (System.nanoTime() - startTimeNanonseconds > 
+							maxExecutionTimeNanoseconds)) {
 				break;
 			}
 
-			UdpDatagram data = new UdpDatagram(i, UdpDatagram.CLIENTTOSERVERMAGIC);
-			byte[] buf = data.byteArray();
+			UdpDatagram data = new UdpDatagram(i);								/* Prepare new datagram #i */
+			byte[] buf = data.byteArray();										/* Get raw datagram buffer */
+			
 			DatagramPacket packet = new DatagramPacket(buf, buf.length, address, port);
 			long answerTime = 0;
 
 			// It isn't the current time as in the original but a random value.
-			// Let's hope nobody changes the server to make this important...
-			long time = System.nanoTime();
-			data.setTime(time);
+			// Let's hope nobody changes the server to make this important...???
+			long time = System.nanoTime();												/* Get up time and   */
+			//data.setTime(time);															/* add it to datagram */
 
 			try {
 				socket.send(packet);
@@ -395,22 +309,26 @@ public class Latency extends Test {
 			}
 
 			try {
-				UdpDatagram answer;
+				UdpDatagram answer = null;												/* Declare datagram */					
 				do {
-					//Checks for the current time and set the SoTimeout accordingly 
-					//because of duplicate packets or packets received after delayTimeout
-					long now = System.nanoTime();
+					//Checks for the current time and 
+					//set the SoTimeout accordingly 
+					//because of duplicate packets or 
+					//packets received after delayTimeout
+					
+					long now = System.nanoTime();										/* Set up socket block limit timeout */
 					long timeout = delayTimeout - (now - time)/1000000;
 					if(timeout<0){
 						throw new PacketTimeOutException();
 					}
 					socket.setSoTimeout((int) timeout);
 					socket.receive(packet);
-					answer = new UdpDatagram(buf);
+					
+					answer = new UdpDatagram(buf);										/* Create datagram from packet */
 				
-				} while (answer.magic != UdpDatagram.SERVERTOCLIENTMAGIC || answer.datagramid != i);
-				answerTime = System.nanoTime();
-				recvPackets++;
+				} while (!answer.isReady(i));											/* Check if this is really datagram with ID i */
+				answerTime = System.nanoTime();											/* Receive time */
+				recvPackets++;															/* Increment packets counter */
 			} catch (SocketTimeoutException e) {
 				continue;
 			} catch (IOException e) {
@@ -420,30 +338,34 @@ public class Latency extends Test {
 			}
 			
 
-			long rtt = answerTime - time;
-			results[recvPackets - 1] = rtt;
+			long rtt = answerTime - time;												/* RTT */
+			results[recvPackets - 1] = rtt;												/* add current result into results array */
 			
-			// *** Pablo's modifications *** //
+			// *** Pablo's modifications *** //TODO to be removed
 			// Local Broadcast receiver to inform about the current speed to the speedTestActivity			
 			Intent intent = new Intent("currentLatencyIntent");			
 			intent.putExtra("currentLatencyValue", String.valueOf(rtt/1000000));			
 			LocalBroadcastManager.getInstance(SKApplication.getAppInstance().getBaseContext()).sendBroadcast(intent);
 			// *** End Pablo's modifications *** //
 
-			sleep(rtt);
+			sleep(rtt);																	/* sleep RTT time before sending next datagram */
 		}
 
-		socket.close();
+		socket.close();																	/* close socket */
 
-		getStats();
+		getStats();																		/* process stats aggregates */
 		
-		setLatencyValueNanoseconds(averageNanoseconds);
+																						/* Return results */
+		output();
+		finish();
+		infoString = LATENCYDONE;
+		
+		setLatencyValueNanoseconds( (long)averageNanoseconds );
 	}
 
 	
-	
-	private void sleep(long rtt) {
-		long sleepPeriod = interPacketTime - rtt;
+	private void sleep(long rtt) {//TODO rethink
+		long sleepPeriod = interPacketTime - rtt;										/* If RTT is greater then interpackettime then there is not sleep */
 
 		if (sleepPeriod > 0) {
 			long millis = (long) Math.floor(sleepPeriod / 1000000);
@@ -462,30 +384,32 @@ public class Latency extends Test {
 		finish();
 	}
 
-	private void getStats() {
-		if (recvPackets <= 0) {
-			failure();
-			return;
-		}
-		testStatus = "OK";
-
-		// Calculate statistics
-		// Results sorted in order to take into account the percentile
+	public/*private*/ int getNumOfResults(){
 		int nResults = 0;
-		if (recvPackets < 100) {
-			nResults = recvPackets;
+		if (recvPackets < 100) {																/* If result set is less then 100 packets  */
+			nResults = recvPackets;																/* use it as is */
 		} else {
-			nResults = (int) Math.ceil(percentile / 100.0 * recvPackets);
+			nResults = (int) Math.ceil(percentile / 100.0 * recvPackets);						/* otherwise apply percentile (100 - absent default) */
 		}
-		Arrays.sort(results, 0, recvPackets);
+		return nResults;
+	}
+	
+	private void getAverage(){
+		int nResults = getNumOfResults();
+		
+		Arrays.sort(results, 0, recvPackets);													/* find min and max values of the array considering percentile */
 		minimumNanoseconds = results[0];
 		maximumNanoseconds = results[nResults - 1];
 		averageNanoseconds = 0;
 		for (int i = 0; i < nResults; i++) {
 			averageNanoseconds += results[i];
 		}
-		averageNanoseconds /= nResults;
+		averageNanoseconds /= nResults;															/* average */
+	}
 
+	private void getStdDev(){
+		int nResults = getNumOfResults();
+		
 		stddeviationNanoseconds = 0;
 
 		for (int i = 0; i < nResults; ++i) {
@@ -496,13 +420,18 @@ public class Latency extends Test {
 			stddeviationNanoseconds = Math.sqrt(stddeviationNanoseconds / (nResults - 1));
 		} else {
 			stddeviationNanoseconds = 0;
+		}		
+	}
+	
+	private void getStats() {
+		if (recvPackets <= 0) {																	/* Return if weird number of packets  */
+			failure();
+			return;
 		}
+		testStatus = "OK";																		/* Otherwise status is OK */
 
-		// Return results
-		output();
-		finish();
-		infoString = LATENCYDONE;
-
+		getAverage();
+		getStdDev();																			/* std deviation */
 	}
 
 	private void setTarget(String target) {
@@ -575,8 +504,8 @@ public class Latency extends Test {
 	private int sentPackets = 0;
 	private int recvPackets = 0;
 	private int interPacketTime = 0;
-	private long[] results = null;
-	private BlockingQueue<Result> bq_results = null;
+	/*private*/public long[] results = null;
+	private BlockingQueue<Long> bq_results = null;
 	
 	final private void setParams(List<Param> params) {
 		try {
@@ -596,9 +525,7 @@ public class Latency extends Test {
 					setPercentile(Integer.parseInt(value));
 				} else if (param.contains( MAXTIME)) {
 					setMaxExecutionTime(Long.parseLong(value));
-				} else {
-					break;
-				}
+				} 
 			}
 		} catch (NumberFormatException nfe) {
 			return;

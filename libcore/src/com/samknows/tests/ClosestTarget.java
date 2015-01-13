@@ -38,6 +38,16 @@ import com.samknows.tests.interfaces.ETestType;
 
 public class ClosestTarget extends Test {
 	
+	private class ResultLatency {
+		public String target;
+		public long rttMicroseconds;
+
+		public ResultLatency(String _target, long nanoseconds) {
+			target = _target;
+			rttMicroseconds = nanoseconds / 1000;
+		}
+	}
+	
 	/*
 	 * constants for creating a ClosestTarget test
 	 */
@@ -82,7 +92,7 @@ public class ClosestTarget extends Test {
 	}
 	
 	//Used to collect the results from the individual LatencyTests as soon as the finish
-	public BlockingQueue<Latency.Result> bq_results = new LinkedBlockingQueue<Latency.Result>();
+	public BlockingQueue<ResultLatency> bq_results = new LinkedBlockingQueue<ResultLatency>();
 	
 	//public ClosestTarget() {
 	//	synchronized (ClosestTarget.this) {	
@@ -336,11 +346,27 @@ public class ClosestTarget extends Test {
 
 				// Add a new result to the queue for display...
 				// Will be ignored if not the best yet!
-				Latency.sCreateAndPushLatencyResultNanoseconds(bq_results, closestTarget, (long) curr_best_Nanoseconds);
+				sCreateAndPushLatencyResultNanoseconds(bq_results, closestTarget, (long) curr_best_Nanoseconds);
 			}
 		}
 	}
 		
+	public void setBlockingQueueResult(BlockingQueue<ResultLatency> queue) {
+		bq_results = queue;
+	}
+	
+	private void sCreateAndPushLatencyResultNanoseconds(BlockingQueue<ResultLatency> bq_results, String inTarget, double inRttNanoseconds) {
+		if (bq_results != null) {
+			// Pass-in the value in nanoseconds
+     		ResultLatency r = new ResultLatency(inTarget, (long)inRttNanoseconds);
+			try {
+				bq_results.put(r);
+			} catch (InterruptedException e) {
+				SKLogger.sAssert(Latency.class, false);
+			}
+		}
+	}
+	
 	// This only returns when done...
 	private boolean blockingTryHttpClosestTargetTestIfUdpTestFails() {
 		
@@ -465,9 +491,8 @@ public class ClosestTarget extends Test {
 		latencyTests = new Latency[targets.size()];
 		
 		for (int i = 0; i < targets.size(); i++) {
-			Latency lt = new Latency(targets.get(i), port, nPackets,
-					interPacketTime, delayTimeout);
-			lt.setBlockingQueueResult(bq_results);
+			Latency lt = new Latency(targets.get(i), port, nPackets, interPacketTime, delayTimeout);
+			setBlockingQueueResult(bq_results);
 			latencyTests[i] = lt;
 			if (latencyTests[i].isReady()) {
 				Thread t = new Thread(latencyTests[i]);
@@ -666,7 +691,7 @@ public class ClosestTarget extends Test {
 		
 		Result ret = new Result();
 		try{
-			Latency.Result r = bq_results.take();
+			ResultLatency r = bq_results.take();
 			ret.completed = finished;
 			
 			if (mbInHttpTestingFallbackMode == false) {
